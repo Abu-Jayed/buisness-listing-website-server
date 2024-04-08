@@ -81,13 +81,27 @@ async function run() {
     });
     /* add a listing end */
 
-    /*//? show myListing page start   this api is tested working properly */
+    /*//? show myListing page start -- this api is tested working properly */
     app.get("/myListing/:email", async (req, res) => {
       // console.log('email',req.params.email);
       
       const myListing = await listing
         .find({
             listedBy: req.params.email,
+            pending: true
+          })
+          .toArray();
+        res.send(myListing);
+      });
+    /* show my listing page  end */
+
+    /*//? show my pending Listing page start -- this api is tested working properly do not touch it*/
+    app.get("/myPending/:email", async (req, res) => {
+      // console.log('email',req.params.email);
+      const myListing = await listing
+        .find({
+            listedBy: req.params.email,
+            pending: false
           })
           .toArray();
         res.send(myListing);
