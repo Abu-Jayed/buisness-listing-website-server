@@ -101,6 +101,20 @@ async function run() {
       const myListing = await listing
         .find({
             listedBy: req.params.email,
+            pending: true
+          })
+          .toArray();
+        res.send(myListing);
+      });
+    /* show my listing page  end */
+
+
+    /*//? show my Published Listing page start -- this api is tested working properly do not touch it*/
+    app.get("/myPublished/:email", async (req, res) => {
+      // console.log('email',req.params.email);
+      const myListing = await listing
+        .find({
+            listedBy: req.params.email,
             pending: false
           })
           .toArray();
