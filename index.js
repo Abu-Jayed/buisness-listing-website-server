@@ -122,6 +122,19 @@ async function run() {
       });
     /* show my listing page  end */
 
+    /*//? show My Featured Listing page start -- this api is tested working properly do not touch it*/
+    app.get("/myFeatured/:email", async (req, res) => {
+      // console.log('email',req.params.email);
+      const myListing = await listing
+        .find({
+            listedBy: req.params.email,
+            featured: true
+          })
+          .toArray();
+        res.send(myListing);
+      });
+    /* show my listing page  end */
+
     /* update a listing start */
     app.put("/listing/:id", async (req, res) => {
       const id = req.params.id;
