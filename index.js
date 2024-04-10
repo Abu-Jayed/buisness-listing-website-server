@@ -213,6 +213,23 @@ async function run() {
       });
     /* show All Featured Listing api end */
 
+    /* update a pending listing to published listing start */
+    app.put("/pendingListing/:id", async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      console.log(body);
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          pending: false,
+        },
+      };
+      const result = await listing.updateOne(filter, updateDoc);
+      console.log(result);
+      res.send(result);
+    });
+    /* update a pending listing to published listing end */
+
 
 
 
