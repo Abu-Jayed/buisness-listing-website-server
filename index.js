@@ -200,18 +200,18 @@ async function run() {
       });
     /* show All Published Listing api end */
 
-    
-    /*//? show All Published Listing api start -- this api is tested working properly do not touch it*/
-    app.get("/all-published", async (req, res) => {
+
+    /*//? show All Featured Listing api start -- this api is tested working properly do not touch it*/
+    app.get("/all-featured", async (req, res) => {
       // console.log('email',req.params.email);
-      const allPublished = await listing
+      const allFeatured = await listing
         .find({
-            pending: false
+          featured: true
           })
           .toArray();
-        res.send(allPublished);
+        res.send(allFeatured);
       });
-    /* show All Published Listing api end */
+    /* show All Featured Listing api end */
 
 
 
