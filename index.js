@@ -167,6 +167,19 @@ async function run() {
 
     /* delete a listing end */
 
+
+    // ! Below All Api Will be Related to Admin | Please To not Change anything Here.
+
+    // Find All listing Data start
+    app.get("/all-listing", async (req, res) => {
+      const cursor = listing.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    // Find All listing Data end
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("BLW").command({ ping: 1 });
     console.log("You successfully connected to MongoDB!");
