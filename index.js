@@ -84,15 +84,15 @@ async function run() {
     /*//? show myListing page start -- this api is tested working properly */
     app.get("/myListing/:email", async (req, res) => {
       // console.log('email',req.params.email);
-      
+
       const myListing = await listing
         .find({
-            listedBy: req.params.email,
-            pending: true
-          })
-          .toArray();
-        res.send(myListing);
-      });
+          listedBy: req.params.email,
+          pending: true,
+        })
+        .toArray();
+      res.send(myListing);
+    });
     /* show my listing page  end */
 
     /*//? show my pending Listing page start -- this api is tested working properly do not touch it*/
@@ -100,26 +100,25 @@ async function run() {
       // console.log('email',req.params.email);
       const myListing = await listing
         .find({
-            listedBy: req.params.email,
-            pending: true
-          })
-          .toArray();
-        res.send(myListing);
-      });
+          listedBy: req.params.email,
+          pending: true,
+        })
+        .toArray();
+      res.send(myListing);
+    });
     /* show my listing page  end */
-
 
     /*//? show my Published Listing page start -- this api is tested working properly do not touch it*/
     app.get("/myPublished/:email", async (req, res) => {
       // console.log('email',req.params.email);
       const myListing = await listing
         .find({
-            listedBy: req.params.email,
-            pending: false
-          })
-          .toArray();
-        res.send(myListing);
-      });
+          listedBy: req.params.email,
+          pending: false,
+        })
+        .toArray();
+      res.send(myListing);
+    });
     /* show my listing page  end */
 
     /*//? show My Featured Listing page start -- this api is tested working properly do not touch it*/
@@ -127,12 +126,12 @@ async function run() {
       // console.log('email',req.params.email);
       const myListing = await listing
         .find({
-            listedBy: req.params.email,
-            featured: true
-          })
-          .toArray();
-        res.send(myListing);
-      });
+          listedBy: req.params.email,
+          featured: true,
+        })
+        .toArray();
+      res.send(myListing);
+    });
     /* show my listing page  end */
 
     /* update a listing start */
@@ -167,7 +166,6 @@ async function run() {
 
     /* delete a listing end */
 
-
     // ! Below All Api Will be Related to Admin | Please To not Change anything Here.
 
     // Find All listing Data start
@@ -183,16 +181,37 @@ async function run() {
       // console.log('email',req.params.email);
       const allPending = await listing
         .find({
-            pending: true
-          })
-          .toArray();
-        res.send(allPending);
-      });
+          pending: true,
+        })
+        .toArray();
+      res.send(allPending);
+    });
     /* show All website pending Data end */
 
+    /*//? show All Published Listing api start -- this api is tested working properly do not touch it*/
+    app.get("/all-published", async (req, res) => {
+      // console.log('email',req.params.email);
+      const allPublished = await listing
+        .find({
+            pending: false
+          })
+          .toArray();
+        res.send(allPublished);
+      });
+    /* show All Published Listing api end */
 
-
-
+    
+    /*//? show All Published Listing api start -- this api is tested working properly do not touch it*/
+    app.get("/all-published", async (req, res) => {
+      // console.log('email',req.params.email);
+      const allPublished = await listing
+        .find({
+            pending: false
+          })
+          .toArray();
+        res.send(allPublished);
+      });
+    /* show All Published Listing api end */
 
 
 
