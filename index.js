@@ -213,7 +213,7 @@ async function run() {
       });
     /* show All Featured Listing api end */
 
-    /* update a pending listing to published listing start */
+    /* //?update a pending listing to published listing start -- this api is tested & working properly don't touch it. */
     app.put("/pendingListing/:id", async (req, res) => {
       const id = req.params.id;
       const body = req.body;
