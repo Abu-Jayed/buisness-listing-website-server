@@ -178,6 +178,23 @@ async function run() {
     });
     // Find All listing Data end
 
+    /*//? show All website pending Data - start -- this api is tested working properly do not touch it*/
+    app.get("/all-pending", async (req, res) => {
+      // console.log('email',req.params.email);
+      const allPending = await listing
+        .find({
+            pending: true
+          })
+          .toArray();
+        res.send(allPending);
+      });
+    /* show All website pending Data end */
+
+
+
+
+
+
 
 
     // Send a ping to confirm a successful connection
