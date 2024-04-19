@@ -38,6 +38,7 @@ async function run() {
     const BuisnessListingDB = client.db("BLW");
     // const collectionDemo = BuisnessListingDB.collection("collection_name");
     const listing = BuisnessListingDB.collection("listing");
+    const Users = BuisnessListingDB.collection("users");
 
     /* find all listing */
     app.get("/all-listing", async (req, res) => {
@@ -80,6 +81,23 @@ async function run() {
       }
     });
     /* add a listing end */
+
+    /* create a new user start */
+    app.post("/api/auth/register", async (req, res) => {
+      const body = req.body;
+      body.createdAt = new Date();
+      // console.log(body);
+      const result = await Users.insertOne(body);
+      if (result?.insertedId) {
+        return res.status(200).send(result);
+      } else {
+        return res.status(404).send({
+          message: "can not insert try again leter",
+          status: false,
+        });
+      }
+    });
+    /* create a new user end */
 
     /*//? show myListing page start -- this api is tested working properly */
     app.get("/myListing/:email", async (req, res) => {
