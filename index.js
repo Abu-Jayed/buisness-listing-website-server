@@ -69,6 +69,9 @@ async function run() {
     app.post("/addListing", async (req, res) => {
       const body = req.body;
       body.createdAt = new Date();
+      body.pending = true ;
+      body.published = false ;
+      body.featured = false ;
       // console.log(body);
       const result = await listing.insertOne(body);
       if (result?.insertedId) {
