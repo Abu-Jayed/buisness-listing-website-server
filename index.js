@@ -101,6 +101,14 @@ async function run() {
       }
     });
     /* create a new user end */
+    
+    // get all users start
+    app.get("/allUsers",async(req,res)=> {
+      const cursor = Users.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+    // get all users end
 
     /*//? show myListing page start -- this api is tested working properly */
     app.get("/myListing/:email", async (req, res) => {
