@@ -101,7 +101,7 @@ async function run() {
       }
     });
     /* create a new user end */
-    
+
     // get all users start
     app.get("/allUsers",async(req,res)=> {
       const cursor = Users.find();
@@ -245,8 +245,6 @@ async function run() {
     /* //?update a pending listing to published listing start -- this api is tested & working properly don't touch it. */
     app.put("/pendingListing/:id", async (req, res) => {
       const id = req.params.id;
-      const body = req.body;
-      console.log(body);
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
