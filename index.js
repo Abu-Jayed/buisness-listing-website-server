@@ -69,9 +69,9 @@ async function run() {
     app.post("/addListing", async (req, res) => {
       const body = req.body;
       body.createdAt = new Date();
-      body.pending = true ;
-      body.published = false ;
-      body.featured = false ;
+      body.pending = true;
+      body.published = false;
+      body.featured = false;
       // console.log(body);
       const result = await listing.insertOne(body);
       if (result?.insertedId) {
@@ -103,11 +103,11 @@ async function run() {
     /* create a new user end */
 
     // get all users start
-    app.get("/allUsers",async(req,res)=> {
+    app.get("/allUsers", async (req, res) => {
       const cursor = Users.find();
       const result = await cursor.toArray();
       res.send(result);
-    })
+    });
     // get all users end
 
     /*//? show myListing page start -- this api is tested working properly */
@@ -222,24 +222,23 @@ async function run() {
       // console.log('email',req.params.email);
       const allPublished = await listing
         .find({
-            pending: false
-          })
-          .toArray();
-        res.send(allPublished);
-      });
+          pending: false,
+        })
+        .toArray();
+      res.send(allPublished);
+    });
     /* show All Published Listing api end */
-
 
     /*//? show All Featured Listing api start -- this api is tested working properly do not touch it*/
     app.get("/all-featured", async (req, res) => {
       // console.log('email',req.params.email);
       const allFeatured = await listing
         .find({
-          featured: true
-          })
-          .toArray();
-        res.send(allFeatured);
-      });
+          featured: true,
+        })
+        .toArray();
+      res.send(allFeatured);
+    });
     /* show All Featured Listing api end */
 
     /* //?update a pending listing to published listing start -- this api is tested & working properly don't touch it. */
@@ -249,6 +248,7 @@ async function run() {
       const updateDoc = {
         $set: {
           pending: false,
+          published: true,
         },
       };
       const result = await listing.updateOne(filter, updateDoc);
@@ -256,9 +256,6 @@ async function run() {
       res.send(result);
     });
     /* update a pending listing to published listing end */
-
-
-
 
     // Send a ping to confirm a successful connection
     await client.db("BLW").command({ ping: 1 });
