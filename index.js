@@ -67,11 +67,9 @@ async function run() {
 
     app.get("/tool/:slug", async (req, res) => {
       const slug = req.params.slug;
-      const result = await listing
-        .find({
-          slug,
-        })
-        .toArray();
+      const result = await listing.findOne({
+        slug,
+      });
       res.send(result);
     });
 
