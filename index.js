@@ -65,6 +65,16 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/tool/:slug", async (req, res) => {
+      const slug = req.params.slug;
+      const myListing = await listing
+        .find({
+          slug,
+        })
+        .toArray();
+      res.send(myListing);
+    });
+
     /* add a listing start */
     app.post("/addListing", async (req, res) => {
       const body = req.body;
