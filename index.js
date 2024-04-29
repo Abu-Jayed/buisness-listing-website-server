@@ -67,12 +67,12 @@ async function run() {
 
     app.get("/tool/:slug", async (req, res) => {
       const slug = req.params.slug;
-      const myListing = await listing
+      const result = await listing
         .find({
           slug,
         })
         .toArray();
-      res.send(myListing);
+      res.send(result);
     });
 
     /* add a listing start */
@@ -126,8 +126,7 @@ async function run() {
 
       const myListing = await listing
         .find({
-          listedBy: req.params.email,
-          pending: true,
+          submitedBy: req.params.email,
         })
         .toArray();
       res.send(myListing);
