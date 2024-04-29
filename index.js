@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 const corsConfig = {
   origin: "*",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 };
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
@@ -190,6 +190,32 @@ async function run() {
       res.send(result);
     });
     /* update a listing end */
+
+    /* //! update a listing saved */
+    app.patch("/save-listing/:id", async (req, res) => {
+      const id = req.params.id;
+
+      try {
+        const filter = { _id: new ObjectId(id) };
+        console.log(filter);
+        const updateDoc = {
+          $inc: { saved: 1 }, // Increment the 'saved' property by 1
+        };
+
+        const result = await listing.updateOne(filter, updateDoc);
+        console.log(result);
+
+        if (result.modifiedCount === 1) {
+          res.status(200).json({ message: "Object updated successfully." });
+        } else {
+          res.status(404).json({ message: "Object not found." });
+        }
+      } catch (error) {
+        console.error("Error updating object:", error);
+        res.status(500).json({ message: `Error updating object ${error}` });
+      }
+      // res.send("ok")
+    });
 
     /* delete a listing code start */
 
