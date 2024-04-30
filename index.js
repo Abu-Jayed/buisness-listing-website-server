@@ -249,25 +249,26 @@ async function run() {
         { $set: { savedByUsers: savedByUsers } }
       );
 
-      // Update thisCustomerLikedListing in the customer collection
-      const customerDoc = await savedListing.findOne({ email: email });
-      if (customerDoc) {
-        let thisCustomerLikedListing = customerDoc.thisCustomerLikedListing || [];
-        const listingIndex = thisCustomerLikedListing.indexOf(listingId.toString());
+      // Update thisUserLikedTool in the customer collection
+      const userDoc = await savedListing.findOne({ email: email });
+      if (userDoc) {
+        let thisUserLikedTool = userDoc.thisUserLikedTool || [];
+        const listingIndex = thisUserLikedTool.indexOf(listingId.toString());
+        console.log(listingIndex);
         if (listingIndex !== -1) {
-          thisCustomerLikedListing.splice(listingIndex, 1); // Remove listingId if it exists
+          thisUserLikedTool.splice(listingIndex, 1); // Remove listingId if it exists
         } else {
-          thisCustomerLikedListing.push({ id: listingId.toString(), toolName: toolName }); // Add listingId if it doesn't exist
+          thisUserLikedTool.push({ id: listingId.toString(), toolName: toolName }); // Add listingId if it doesn't exist
         }
         await savedListing.updateOne(
           { email: email },
-          { $set: { thisCustomerLikedListing: thisCustomerLikedListing } }
+          { $set: { thisUserLikedTool: thisUserLikedTool } }
         );
       } else {
         // If customer does not exist, create a new entry
         await savedListing.insertOne({
           email: email,
-          thisCustomerLikedListing: [{ id: listingId.toString(), toolName: toolName }]
+          thisUserLikedTool: [{ id: listingId.toString(), toolName: toolName }]
         });
       }
 
