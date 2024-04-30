@@ -251,26 +251,31 @@ async function run() {
 
       // Update thisUserLikedTool in the customer collection
       const userDoc = await savedListing.findOne({ email: email });
-      if (userDoc) {
-        let thisUserLikedTool = userDoc.thisUserLikedTool || [];
-        const listingIndex = thisUserLikedTool.indexOf(listingId.toString());
-        console.log(listingIndex);
-        if (listingIndex !== -1) {
-          thisUserLikedTool.splice(listingIndex, 1); // Remove listingId if it exists
-        } else {
-          thisUserLikedTool.push({ id: listingId.toString(), toolName: toolName }); // Add listingId if it doesn't exist
-        }
-        await savedListing.updateOne(
-          { email: email },
-          { $set: { thisUserLikedTool: thisUserLikedTool } }
-        );
-      } else {
-        // If customer does not exist, create a new entry
-        await savedListing.insertOne({
-          email: email,
-          thisUserLikedTool: [{ id: listingId.toString(), toolName: toolName }]
-        });
-      }
+
+if (userDoc) {
+  let thisUserLikedTool = userDoc.thisUserLikedTool || [];
+  const existingIndex = thisUserLikedTool.findIndex(item => item.id === listingId.toString());
+
+  if (existingIndex !== -1) {
+    // If the listing ID already exists, remove it
+    thisUserLikedTool.splice(existingIndex, 1);
+  } else {
+    // If the listing ID doesn't exist, add it to the array
+    thisUserLikedTool.push({ id: listingId.toString(), toolName: toolName });
+  }
+
+  // Update the document in the collection
+  await savedListing.updateOne(
+    { email: email },
+    { $set: { thisUserLikedTool: thisUserLikedTool } }
+  );
+} else {
+  // If the user document doesn't exist, create a new entry
+  await savedListing.insertOne({
+    email: email,
+    thisUserLikedTool: [{ id: listingId.toString(), toolName: toolName }]
+  });
+}
 
       res.status(200).send({ message: 'Customer and listing updated successfully' });
     } catch (error) {
