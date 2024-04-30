@@ -39,6 +39,8 @@ async function run() {
     // const collectionDemo = BuisnessListingDB.collection("collection_name");
     const listing = BuisnessListingDB.collection("listing");
     const Users = BuisnessListingDB.collection("users");
+    const customer = BuisnessListingDB.collection("customer");
+
 
     /* find all listing */
     app.get("/all-listing", async (req, res) => {
@@ -216,6 +218,65 @@ async function run() {
       }
       // res.send("ok")
     });
+
+
+// POST route to create or update the "customerArr" property
+  app.post('/update-customer-arr/:id', async (req, res) => {
+    const listingId = req.params.id;
+    const { email } = req.body;
+    console.log({email,listingId});
+    // res.status(200).send({ message: 'ok' })
+    try {
+      // Find the listing by ID
+      const listingDoc = await listing.findOne({ _id: new ObjectId(listingId) });
+      console.log({listingDoc});
+      if (!listingDoc) {
+        res.status(404).send({ error: 'Listing not found' });
+        return;
+      }
+
+      // Update customerArr in the listing collection
+      let customerArr = listingDoc.customerArr || [];
+      const emailIndex = customerArr.indexOf(email);
+      if (emailIndex !== -1) {
+        customerArr.splice(emailIndex, 1); // Remove email if it exists
+      } else {
+        customerArr.push(email); // Add email if it doesn't exist
+      }
+      await listing.updateOne(
+        { _id: new ObjectId(listingId) },
+        { $set: { customerArr: customerArr } }
+      );
+
+      // Update thisCustomerLikedListing in the customer collection
+      const customerDoc = await customer.findOne({ email: email });
+      if (customerDoc) {
+        let thisCustomerLikedListing = customerDoc.thisCustomerLikedListing || [];
+        const listingIndex = thisCustomerLikedListing.indexOf(listingId.toString());
+        if (listingIndex !== -1) {
+          thisCustomerLikedListing.splice(listingIndex, 1); // Remove listingId if it exists
+        } else {
+          thisCustomerLikedListing.push(listingId.toString()); // Add listingId if it doesn't exist
+        }
+        await customer.updateOne(
+          { email: email },
+          { $set: { thisCustomerLikedListing: thisCustomerLikedListing } }
+        );
+      } else {
+        // If customer does not exist, create a new entry
+        await customer.insertOne({
+          email: email,
+          thisCustomerLikedListing: [listingId.toString()]
+        });
+      }
+
+      res.send({ message: 'Customer and listing updated successfully' });
+    } catch (error) {
+      console.error('Error updating customer and listing:', error);
+      res.status(500).send({ error: 'Internal server error' });
+    }
+  });
+
 
     /* delete a listing code start */
 
