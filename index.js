@@ -221,7 +221,7 @@ async function run() {
 
 
 // POST route to create or update the "savedByUsers" property
-  app.post('/update-customer-arr/:id', async (req, res) => {
+  app.post('/update-savedTool/:id', async (req, res) => {
     const listingId = req.params.id;
     const { email } = req.body;
     console.log({email,listingId});
