@@ -64,7 +64,7 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const cursor = listing.find(query);
       const result = await cursor.toArray();
-      res.send(result);
+      res.status(200).send(result);
     });
 
     app.get("/tool/:slug", async (req, res) => {
@@ -271,7 +271,7 @@ async function run() {
         });
       }
 
-      res.send({ message: 'Customer and listing updated successfully' });
+      res.status(200).send({ message: 'Customer and listing updated successfully' });
     } catch (error) {
       console.error('Error updating customer and listing:', error);
       res.status(500).send({ error: 'Internal server error' });
