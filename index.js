@@ -41,7 +41,6 @@ async function run() {
     const Users = BuisnessListingDB.collection("users");
     const savedListing = BuisnessListingDB.collection("savedListing");
 
-
     /* find all listing */
     app.get("/all-listing", async (req, res) => {
       const cursor = listing.find();
@@ -219,71 +218,80 @@ async function run() {
       // res.send("ok")
     });
 
+    // POST route to create or update the "savedByUsers" property
+    app.post("/update-savedTool/:id", async (req, res) => {
+      const listingId = req.params.id;
+      const { email } = req.body;
+      console.log({ email, listingId });
+      // res.status(200).send({ message: 'ok' })
+      try {
+        // Find the listing by ID
+        const listingDoc = await listing.findOne({
+          _id: new ObjectId(listingId),
+        });
+        const toolName = listingDoc.toolName;
+        console.log({ listingDoc });
+        if (!listingDoc) {
+          res.status(404).send({ error: "Listing not found" });
+          return;
+        }
 
-// POST route to create or update the "savedByUsers" property
-  app.post('/update-savedTool/:id', async (req, res) => {
-    const listingId = req.params.id;
-    const { email } = req.body;
-    console.log({email,listingId});
-    // res.status(200).send({ message: 'ok' })
-    try {
-      // Find the listing by ID
-      const listingDoc = await listing.findOne({ _id: new ObjectId(listingId) });
-      const toolName = listingDoc.toolName
-      console.log({listingDoc});
-      if (!listingDoc) {
-        res.status(404).send({ error: 'Listing not found' });
-        return;
+        // Update savedByUsers in the listing collection
+        let savedByUsers = listingDoc.savedByUsers || [];
+        const emailIndex = savedByUsers.indexOf(email);
+        if (emailIndex !== -1) {
+          savedByUsers.splice(emailIndex, 1); // Remove email if it exists
+        } else {
+          savedByUsers.push(email); // Add email if it doesn't exist
+        }
+        await listing.updateOne(
+          { _id: new ObjectId(listingId) },
+          { $set: { savedByUsers: savedByUsers } }
+        );
+
+        // Update thisUserLikedTool in the customer collection
+        const userDoc = await savedListing.findOne({ email: email });
+
+        if (userDoc) {
+          let thisUserLikedTool = userDoc.thisUserLikedTool || [];
+          const existingIndex = thisUserLikedTool.findIndex(
+            (item) => item.id === listingId.toString()
+          );
+
+          if (existingIndex !== -1) {
+            // If the listing ID already exists, remove it
+            thisUserLikedTool.splice(existingIndex, 1);
+          } else {
+            // If the listing ID doesn't exist, add it to the array
+            thisUserLikedTool.push({
+              id: listingId.toString(),
+              toolName: toolName,
+            });
+          }
+
+          // Update the document in the collection
+          await savedListing.updateOne(
+            { email: email },
+            { $set: { thisUserLikedTool: thisUserLikedTool } }
+          );
+        } else {
+          // If the user document doesn't exist, create a new entry
+          await savedListing.insertOne({
+            email: email,
+            thisUserLikedTool: [
+              { id: listingId.toString(), toolName: toolName },
+            ],
+          });
+        }
+
+        res
+          .status(200)
+          .send({ message: "Customer and listing updated successfully" });
+      } catch (error) {
+        console.error("Error updating customer and listing:", error);
+        res.status(500).send({ error: "Internal server error" });
       }
-
-      // Update savedByUsers in the listing collection
-      let savedByUsers = listingDoc.savedByUsers || [];
-      const emailIndex = savedByUsers.indexOf(email);
-      if (emailIndex !== -1) {
-        savedByUsers.splice(emailIndex, 1); // Remove email if it exists
-      } else {
-        savedByUsers.push(email); // Add email if it doesn't exist
-      }
-      await listing.updateOne(
-        { _id: new ObjectId(listingId) },
-        { $set: { savedByUsers: savedByUsers } }
-      );
-
-      // Update thisUserLikedTool in the customer collection
-      const userDoc = await savedListing.findOne({ email: email });
-
-if (userDoc) {
-  let thisUserLikedTool = userDoc.thisUserLikedTool || [];
-  const existingIndex = thisUserLikedTool.findIndex(item => item.id === listingId.toString());
-
-  if (existingIndex !== -1) {
-    // If the listing ID already exists, remove it
-    thisUserLikedTool.splice(existingIndex, 1);
-  } else {
-    // If the listing ID doesn't exist, add it to the array
-    thisUserLikedTool.push({ id: listingId.toString(), toolName: toolName });
-  }
-
-  // Update the document in the collection
-  await savedListing.updateOne(
-    { email: email },
-    { $set: { thisUserLikedTool: thisUserLikedTool } }
-  );
-} else {
-  // If the user document doesn't exist, create a new entry
-  await savedListing.insertOne({
-    email: email,
-    thisUserLikedTool: [{ id: listingId.toString(), toolName: toolName }]
-  });
-}
-
-      res.status(200).send({ message: 'Customer and listing updated successfully' });
-    } catch (error) {
-      console.error('Error updating customer and listing:', error);
-      res.status(500).send({ error: 'Internal server error' });
-    }
-  });
-
+    });
 
     /* delete a listing code start */
 
