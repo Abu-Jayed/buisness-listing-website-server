@@ -293,6 +293,19 @@ async function run() {
       }
     });
 
+    // @heading -- My saved listing api
+    // @desc -- We will show user his saved listing quering via his email
+    // @api -- my-saved-listing
+    // @api-desc -- find a single data by email. email will come from body.
+    app.get("/my-saved-listing/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const result = await savedListing.findOne({
+        email,
+      });
+      res.send(result);
+    });
+
     /* delete a listing code start */
 
     app.delete("/listing/:id", async (req, res) => {
