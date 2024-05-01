@@ -230,6 +230,7 @@ async function run() {
           _id: new ObjectId(listingId),
         });
         const toolName = listingDoc.toolName;
+        const toolDoc = listingDoc
         console.log({ listingDoc });
         if (!listingDoc) {
           res.status(404).send({ error: "Listing not found" });
@@ -266,6 +267,7 @@ async function run() {
             thisUserLikedTool.push({
               id: listingId.toString(),
               toolName: toolName,
+              toolDoc
             });
           }
 
@@ -279,7 +281,7 @@ async function run() {
           await savedListing.insertOne({
             email: email,
             thisUserLikedTool: [
-              { id: listingId.toString(), toolName: toolName },
+              { id: listingId.toString(), toolName: toolName,toolDoc },
             ],
           });
         }
