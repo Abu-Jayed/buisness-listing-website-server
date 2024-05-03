@@ -230,7 +230,7 @@ async function run() {
           _id: new ObjectId(listingId),
         });
         const toolName = listingDoc.toolName;
-        const toolDoc = listingDoc
+        const toolDoc = listingDoc;
         console.log({ listingDoc });
         if (!listingDoc) {
           res.status(404).send({ error: "Listing not found" });
@@ -267,7 +267,7 @@ async function run() {
             thisUserLikedTool.push({
               id: listingId.toString(),
               toolName: toolName,
-              toolDoc
+              toolDoc,
             });
           }
 
@@ -281,7 +281,7 @@ async function run() {
           await savedListing.insertOne({
             email: email,
             thisUserLikedTool: [
-              { id: listingId.toString(), toolName: toolName,toolDoc },
+              { id: listingId.toString(), toolName: toolName, toolDoc },
             ],
           });
         }
@@ -380,6 +380,22 @@ async function run() {
       res.send(result);
     });
     /* update a pending listing to published listing end */
+
+    // Most saved listing start
+    app.get("/most-saved-listing", async (req, res) => {
+      try {
+        const savedListings = await listing
+          .find({
+            savedByUsers: { $exists: true, $ne: [] },
+          })
+          .toArray();
+        res.send(savedListings);
+      } catch (error) {
+        console.error("Error fetching most saved listing:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+    // Most saved listing end
 
     // Send a ping to confirm a successful connection
     await client.db("BLW").command({ ping: 1 });
