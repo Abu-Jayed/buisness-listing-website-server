@@ -277,6 +277,25 @@ async function run() {
       console.log(result);
       res.send(result);
     });
+
+    // Decline a pending listing
+    app.delete("/declineListing/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+  
+      try {
+          const result = await listing.deleteOne(filter);
+  
+          if (result.deletedCount === 1) {
+              res.status(200).json({ message: "Listing declined successfully." });
+          } else {
+              res.status(404).json({ message: "Listing not found." });
+          }
+      } catch (error) {
+          res.status(500).json({ message: "Error declining listing.", error: error });
+      }
+  });
+  
     /* update a pending listing to published listing end */
 
     // Send a ping to confirm a successful connection
