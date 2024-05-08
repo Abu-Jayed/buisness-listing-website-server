@@ -182,7 +182,29 @@ async function run() {
       const result = await listing.updateOne(filter, updateDoc);
       res.send(result);
     });
-    /* update a listing end */
+    /* update a listing saved */
+    app.patch("/listing/:id", async (req, res) => {
+      const id = req.params.id;
+    
+      try {
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $inc: { saved: 1 }, // Increment the 'saved' property by 1
+        };
+    
+        const result = await listing.updateOne(filter, updateDoc);
+    
+        if (result.modifiedCount === 1) {
+          res.status(200).json({ message: "Object updated successfully." });
+        } else {
+          res.status(404).json({ message: "Object not found." });
+        }
+      } catch (error) {
+        console.error("Error updating object:", error);
+        res.status(500).json({ message: "Internal server error." });
+      }
+    });
+    
 
     /* delete a listing code start */
 
