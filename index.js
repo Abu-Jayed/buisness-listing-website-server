@@ -411,6 +411,7 @@ async function run() {
         $set: {
           pending: false,
           published: true,
+          publishedAt: new Date(),
         },
       };
       const result = await listing.updateOne(filter, updateDoc);
