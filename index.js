@@ -190,7 +190,28 @@ async function run() {
       const result = await listing.updateOne(filter, updateDoc);
       res.send(result);
     });
-    /* update a listing end */
+    /* update a listing saved */
+    app.patch("/listing/:id", async (req, res) => {
+      const id = req.params.id;
+
+      try {
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $inc: { saved: 1 }, // Increment the 'saved' property by 1
+        };
+
+        const result = await listing.updateOne(filter, updateDoc);
+
+        if (result.modifiedCount === 1) {
+          res.status(200).json({ message: "Object updated successfully." });
+        } else {
+          res.status(404).json({ message: "Object not found." });
+        }
+      } catch (error) {
+        console.error("Error updating object:", error);
+        res.status(500).json({ message: "Internal server error." });
+      }
+    });
 
     /* //! update a listing saved */
     app.patch("/save-listing/:id", async (req, res) => {
@@ -353,6 +374,23 @@ async function run() {
     });
     /* show All Published Listing api end */
 
+    // just launched page
+    app.get("/just-launched", async (req, res) => {
+      try {
+        // Fetch all published data from your MongoDB collection
+        const allPublished = await listing
+          .find({ pending: false })
+          .sort({ createdAt: -1 })
+          .toArray();
+
+        res.status(200).json(allPublished);
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error fetching published data.", error: error });
+      }
+    });
+
     /*//? show All Featured Listing api start -- this api is tested working properly do not touch it*/
     app.get("/all-featured", async (req, res) => {
       // console.log('email',req.params.email);
@@ -379,6 +417,27 @@ async function run() {
       console.log(result);
       res.send(result);
     });
+
+    // Decline a pending listing
+    app.delete("/declineListing/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+
+      try {
+        const result = await listing.deleteOne(filter);
+
+        if (result.deletedCount === 1) {
+          res.status(200).json({ message: "Listing declined successfully." });
+        } else {
+          res.status(404).json({ message: "Listing not found." });
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error declining listing.", error: error });
+      }
+    });
+
     /* update a pending listing to published listing end */
 
     // Most saved listing start
