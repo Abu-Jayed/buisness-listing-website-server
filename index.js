@@ -236,6 +236,18 @@ async function run() {
         .toArray();
       res.send(allPending);
     });
+
+    // get single pending data
+  // Assuming you already have a MongoDB client connected
+
+  app.get("/single-pending/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+
+    const result = await listing.findOne(query);
+    res.send(result);
+  });
+
     /* show All website pending Data end */
 
     /*//? show All Published Listing api start -- this api is tested working properly do not touch it*/
@@ -293,6 +305,29 @@ async function run() {
       console.log(result);
       res.send(result);
     });
+
+    // make changes api to update many properties at once
+
+    app.put("/makeChanges/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updates = req.body; // Assuming the updates are sent in the request body as an object
+    
+      try {
+        const result = await listing.updateOne(filter, { $set: updates });
+        console.log(result);
+    
+        if (result.modifiedCount === 1) {
+          res.status(200).send("Listing updated successfully");
+        } else {
+          res.status(404).send("Listing not found or no changes made");
+        }
+      } catch (error) {
+        console.error("Error updating listing:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+    
 
     // Decline a pending listing
     app.delete("/declineListing/:id", async (req, res) => {
