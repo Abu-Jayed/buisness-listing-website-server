@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 const corsConfig = {
   origin: "*",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 };
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
@@ -39,6 +39,7 @@ async function run() {
     // const collectionDemo = BuisnessListingDB.collection("collection_name");
     const listing = BuisnessListingDB.collection("listing");
     const Users = BuisnessListingDB.collection("users");
+    const savedListing = BuisnessListingDB.collection("savedListing");
 
     /* find all listing */
     app.get("/all-listing", async (req, res) => {
@@ -62,6 +63,14 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const cursor = listing.find(query);
       const result = await cursor.toArray();
+      res.status(200).send(result);
+    });
+
+    app.get("/tool/:slug", async (req, res) => {
+      const slug = req.params.slug;
+      const result = await listing.findOne({
+        slug,
+      });
       res.send(result);
     });
 
@@ -116,8 +125,7 @@ async function run() {
 
       const myListing = await listing
         .find({
-          listedBy: req.params.email,
-          pending: true,
+          submitedBy: req.params.email,
         })
         .toArray();
       res.send(myListing);
@@ -203,6 +211,122 @@ async function run() {
         console.error("Error updating object:", error);
         res.status(500).json({ message: "Internal server error." });
       }
+    });
+
+    /* //! update a listing saved */
+    app.patch("/save-listing/:id", async (req, res) => {
+      const id = req.params.id;
+
+      try {
+        const filter = { _id: new ObjectId(id) };
+        console.log(filter);
+        const updateDoc = {
+          $inc: { saved: 1 }, // Increment the 'saved' property by 1
+        };
+
+        const result = await listing.updateOne(filter, updateDoc);
+        console.log(result);
+
+        if (result.modifiedCount === 1) {
+          res.status(200).json({ message: "Object updated successfully." });
+        } else {
+          res.status(404).json({ message: "Object not found." });
+        }
+      } catch (error) {
+        console.error("Error updating object:", error);
+        res.status(500).json({ message: `Error updating object ${error}` });
+      }
+      // res.send("ok")
+    });
+
+    // POST route to create or update the "savedByUsers" property
+    app.post("/update-savedTool/:id", async (req, res) => {
+      const listingId = req.params.id;
+      const { email } = req.body;
+      console.log({ email, listingId });
+      // res.status(200).send({ message: 'ok' })
+      try {
+        // Find the listing by ID
+        const listingDoc = await listing.findOne({
+          _id: new ObjectId(listingId),
+        });
+        const toolName = listingDoc.toolName;
+        const toolDoc = listingDoc;
+        console.log({ listingDoc });
+        if (!listingDoc) {
+          res.status(404).send({ error: "Listing not found" });
+          return;
+        }
+
+        // Update savedByUsers in the listing collection
+        let savedByUsers = listingDoc.savedByUsers || [];
+        const emailIndex = savedByUsers.indexOf(email);
+        if (emailIndex !== -1) {
+          savedByUsers.splice(emailIndex, 1); // Remove email if it exists
+        } else {
+          savedByUsers.push(email); // Add email if it doesn't exist
+        }
+        await listing.updateOne(
+          { _id: new ObjectId(listingId) },
+          { $set: { savedByUsers: savedByUsers } }
+        );
+
+        // Update thisUserLikedTool in the customer collection
+        const userDoc = await savedListing.findOne({ email: email });
+
+        if (userDoc) {
+          let thisUserLikedTool = userDoc.thisUserLikedTool || [];
+          const existingIndex = thisUserLikedTool.findIndex(
+            (item) => item.id === listingId.toString()
+          );
+
+          if (existingIndex !== -1) {
+            // If the listing ID already exists, remove it
+            thisUserLikedTool.splice(existingIndex, 1);
+          } else {
+            // If the listing ID doesn't exist, add it to the array
+            thisUserLikedTool.push({
+              id: listingId.toString(),
+              toolName: toolName,
+              toolDoc,
+            });
+          }
+
+          // Update the document in the collection
+          await savedListing.updateOne(
+            { email: email },
+            { $set: { thisUserLikedTool: thisUserLikedTool } }
+          );
+        } else {
+          // If the user document doesn't exist, create a new entry
+          await savedListing.insertOne({
+            email: email,
+            thisUserLikedTool: [
+              { id: listingId.toString(), toolName: toolName, toolDoc },
+            ],
+          });
+        }
+
+        res
+          .status(200)
+          .send({ message: "Customer and listing updated successfully" });
+      } catch (error) {
+        console.error("Error updating customer and listing:", error);
+        res.status(500).send({ error: "Internal server error" });
+      }
+    });
+
+    // @heading -- My saved listing api
+    // @desc -- We will show user his saved listing quering via his email
+    // @api -- my-saved-listing
+    // @api-desc -- find a single data by email. email will come from body.
+    app.get("/my-saved-listing/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const result = await savedListing.findOne({
+        email,
+      });
+      res.send(result);
     });
 
     /* delete a listing code start */
@@ -350,6 +474,22 @@ async function run() {
     });
 
     /* update a pending listing to published listing end */
+
+    // Most saved listing start
+    app.get("/most-saved-listing", async (req, res) => {
+      try {
+        const savedListings = await listing
+          .find({
+            savedByUsers: { $exists: true, $ne: [] },
+          })
+          .toArray();
+        res.send(savedListings);
+      } catch (error) {
+        console.error("Error fetching most saved listing:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+    // Most saved listing end
 
     // Send a ping to confirm a successful connection
     await client.db("BLW").command({ ping: 1 });
