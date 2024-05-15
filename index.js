@@ -119,6 +119,22 @@ async function run() {
     });
     // get all users end
 
+    app.put("/updateUser/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updateDoc = { $set: req.body };
+    
+      try {
+        const result = await Users.updateOne(filter, updateDoc);
+        res.send(result)
+        if(result.modifiedCount == 1) {
+          res.status(200).send("user updated successfully")
+        }
+      } catch (error) {
+        res.status(500).send('Error updating user: ' + error.message);
+      }
+    });
+
     /*//? show myListing page start -- this api is tested working properly */
     app.get("/myListing/:email", async (req, res) => {
       // console.log('email',req.params.email);
